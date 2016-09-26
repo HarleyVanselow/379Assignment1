@@ -40,7 +40,7 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 	int32_t start_address = current_memory_pointer;
 	int32_t prev_address;
 	int current_mode = MEM_NO;
-	int prev_mode = mode;
+	int prev_mode = current_mode;
 	
 	do{
 		sigsetjmp(env, 1);
@@ -52,20 +52,24 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 		
 		if(mode_try == 2)
 		{
-			data_pointer = data;
+			char data = * data_pointer;
+			data_pointer = &data;
 			// must be read and write
-			mode = MEM_RW;
+			current_mode = MEM_RW;
 			//save
+		printf("Wrote at %ld\n", (long) current_memory_pointer);
+
 		}else if(mode_try ==1)
 		{
 			char data = * data_pointer;
 			current_mode = MEM_RO;
+		printf("Read at %ld\n", (long) current_memory_pointer);
+
 		}else
 		{
 			current_mode = MEM_NO;
 		}
 
-		printf("Read at %ld\n", (long) current_memory_pointer);
 		current_memory_pointer+=PAGE_SIZE;
 		mode_try =2;
 	}while(current_memory_pointer>0);

@@ -1,0 +1,5 @@
+all:
+	gcc memlayout.c -o memlayout -m32 -static
+
+run: memlayout
+	./memlayout
