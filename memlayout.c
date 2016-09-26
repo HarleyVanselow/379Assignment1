@@ -57,13 +57,13 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 			// must be read and write
 			current_mode = MEM_RW;
 			//save
-		printf("Wrote at %ld\n", (long) current_memory_pointer);
+		printf("Wrote at %lu\n", (long unsigned int) current_memory_pointer);
 
 		} else if(mode_try ==1)
 		{
 			uint32_t data = * data_pointer;
 			current_mode = MEM_RO;
-		printf("Read at %ld\n", (long) current_memory_pointer);
+		printf("Read at %lu\n", (long unsigned int) current_memory_pointer);
 
 		}else
 		{
