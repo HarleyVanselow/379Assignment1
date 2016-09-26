@@ -36,12 +36,22 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 	onSegFault.sa_flags = 1;
 
 	sigaction(SIGSEGV, &onSegFault, NULL);
+	
+	int mode = MEM_NO;
 	do{
 		if (current_memory_pointer < 0) {break;}
 		sigsetjmp(env, 1);
 
 		// printf("Current memory %ld\n", current_memory_pointer);
-		char data = * ((char*) current_memory_pointer);
+		char * data_pointer = ((char*) current_memory_pointer);
+		
+		
+		
+		char data = * data_pointer
+		mode= MEM_RO;
+		data_pointer = data;
+		mode = MEM_RW;
+		
 		// printf("%c",value);
 		// printf("no fault at %d\n", current_memory_pointer);
 		printf("Read at %ld\n", (long) current_memory_pointer);
