@@ -10,7 +10,7 @@
 #define MEM_NO 2
 #define PAGE_SIZE 4096
 
-int32_t current_memory_pointer = 0x0;
+uint32_t current_memory_pointer = 0x0;
 sigjmp_buf env;
 int mode_try = 2;
 
@@ -37,8 +37,8 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 	onSegFault.sa_flags = 1;
 
 	sigaction(SIGSEGV, &onSegFault, NULL);
-	int32_t start_address = current_memory_pointer;
-	int32_t prev_address;
+	uint32_t start_address = current_memory_pointer;
+	uint32_t prev_address;
 	int current_mode = MEM_NO;
 	int prev_mode = current_mode;
 	
@@ -48,26 +48,27 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 		if (current_memory_pointer < 0) {break;}
 
 		// printf("Current memory %ld\n", current_memory_pointer);
-		char * data_pointer = ((char*) current_memory_pointer);
+		uint32_t * data_pointer = ((uint32_t*) current_memory_pointer);
 		
 		if(mode_try == 2)
 		{
-			char data = * data_pointer;
-			data_pointer = &data;
+			uint32_t data = * data_pointer;
+			*data_pointer = data;
 			// must be read and write
 			current_mode = MEM_RW;
 			//save
 		printf("Wrote at %ld\n", (long) current_memory_pointer);
 
-		}else if(mode_try ==1)
+		} else if(mode_try ==1)
 		{
-			char data = * data_pointer;
+			uint32_t data = * data_pointer;
 			current_mode = MEM_RO;
 		printf("Read at %ld\n", (long) current_memory_pointer);
 
 		}else
 		{
 			current_mode = MEM_NO;
+			// printf("couldn't read or write\n");
 		}
 
 		current_memory_pointer+=PAGE_SIZE;
