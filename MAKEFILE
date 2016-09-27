@@ -1,8 +1,0 @@
-all: memlayout
-
-memlayout: memlayout.c
-	gcc memlayout.c -o memlayout.out -m32 -static
-
-clean:
-	rm *.out
-	
