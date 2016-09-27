@@ -1,8 +1,10 @@
-all: memlayout
+all: memlayout.out
 
-memlayout: memlayout.c
-	gcc memlayout.c -o memlayout.out -m32 -static
+memlayout.out: memlayout.c
+	gcc memlayout.c -o memlayout.out -m32 -static #-std=c99
 
-clean:
+run: memlayout.out
+	./memlayout.out
+clean:	
 	rm *.out
 	

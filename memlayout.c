@@ -29,8 +29,6 @@ void handle_seg_fault(int sig)
 
 int get_mem_layout (struct memregion *regions, unsigned int size)
 {
-	printf("%d",3);
-	regions = (struct memregion*)malloc(sizeof(memregion)*size);
 	int region_counter =0;
 	struct sigaction onSegFault;
 	onSegFault.sa_handler = handle_seg_fault;
@@ -57,13 +55,13 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 			*data_pointer = data;
 			// must be read and write
 			current_mode = MEM_RW;
-		printf("Wrote at %lu\n", (long unsigned int) current_memory_pointer);
+		// printf("Wrote at %lu\n", (long unsigned int) current_memory_pointer);
 
 		} else if(mode_try ==1)
 		{
 			uint32_t data = * data_pointer;
 			current_mode = MEM_RO;
-		printf("Read at %lu\n", (long unsigned int) current_memory_pointer);
+		// printf("Read at %lu\n", (long unsigned int) current_memory_pointer);
 
 		}else
 		{
@@ -73,10 +71,14 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 		if(current_mode!=prev_mode)
 		{
 			struct memregion region;
-			region.from = (void *)start_address;
-			region.to = (void *)(current_memory_pointer-PAGE_SIZE);
+			region.from = malloc(sizeof(uint32_t));
+			region.to = malloc(sizeof(uint32_t));
+			*((uint32_t *)region.from) = start_address;
+			*((uint32_t *)region.to) = (current_memory_pointer-PAGE_SIZE);
 			region.mode = prev_mode;
-			
+			// printf("start: %u, end: %u mode: %u\n", start_address, current_memory_pointer - PAGE_SIZE, prev_mode );
+			// printf("start: %u, end: %u mode: %u\n", *(uint32_t *)region.from, *(uint32_t*)region.to, region.mode);
+
 			regions[region_counter] = region;
 			region_counter++;
 			prev_mode=current_mode;
@@ -92,9 +94,15 @@ struct memregion *thediff, unsigned int diffsize);
 
 int main(int argc, char const *argv[])
 {
-	printf("%d",1);
-	get_mem_layout(NULL, 12);
+	struct memregion * ptr;
+	ptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
 	
-	printf("%d",2);
+	int number_of_regions = get_mem_layout(ptr, 30);
+	int i = 0;
+	for (i; i < number_of_regions; ++i)
+	{
+		printf("start: %u, end: %u mode: %u\n", *(uint32_t *)ptr[i].from, *(uint32_t*)ptr[i].to, ptr[i].mode);
+	}
+	
 	return 0;
 }
