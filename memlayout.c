@@ -87,32 +87,15 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 		current_memory_pointer+=PAGE_SIZE;
 		mode_try =2;
 	}while(current_memory_pointer>0);
-	return region_counter;
+	struct memregion region;
+			region.from = malloc(sizeof(uint32_t));
+			region.to = malloc(sizeof(uint32_t));
+			*((uint32_t *)region.from) = start_address;
+			*((uint32_t *)region.to) = (current_memory_pointer-PAGE_SIZE);
+			region.mode = prev_mode;
+	return ++region_counter;
 };
+
 int get_mem_diff (struct memregion *regions, unsigned int howmany,
 struct memregion *thediff, unsigned int diffsize);
 
-int main(int argc, char const *argv[])
-{
-	struct memregion * ptr;
-	ptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
-
-	int number_of_regions = get_mem_layout(ptr, 30);
-	int i = 0;
-	printf("Numer of regions: %d\n", number_of_regions);
-	for (i; i < number_of_regions; ++i)
-	{
-		int mode = ptr[i].mode;
-		char * mode_text;
-		if (mode == 0){
-			mode_text = "RW";
-		} else if (mode == 1){
-			mode_text = "RO";
-		} else {
-			mode_text = "NO";
-		}
-		printf("0x%08X-0x%08X %s\n", *(uint32_t *)ptr[i].from, *(uint32_t*)ptr[i].to, mode_text);
-	}
-	
-	return 0;
-}
