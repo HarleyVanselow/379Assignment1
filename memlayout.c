@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
 
 #define MEM_RW 0
 #define MEM_RO 1
@@ -99,22 +100,22 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 int get_mem_diff (struct memregion *regions, unsigned int howmany,
 struct memregion *thediff, unsigned int diffsize)
 {
-	struct memregion *new_memregion = (struct memregion*)malloc(sizeof(struct memregion)*sizeof);
+	struct memregion *new_memregion = (struct memregion*)malloc(sizeof(struct memregion)*howmany);
 	int new_number_of_regions = get_mem_layout(new_memregion,howmany);
 	int region_counter;
 
 	struct diff{
 		unsigned char mode;
 		uint32_t memory;
-	}
+	};
 
-	struct diff *diffs = (struct diff*)malloc(sizeof(struct diff)*((2**32)/PAGE_SIZE));
+	struct diff *diffs = (struct diff*)malloc(sizeof(struct diff)*((pow(2, 32))/PAGE_SIZE));
 
 	struct memregion new = new_memregion[0];
 	struct memregion old = regions[0];
 	uint32_t try_memory=0;
-
-	while(try_memory<=2**32)
+	int diff_counter;
+	while(try_memory>=0)
 	{
 		int counter;
 		int diff_counter;
@@ -122,7 +123,7 @@ struct memregion *thediff, unsigned int diffsize)
 		unsigned char new_mode;
 		for(counter=0;counter<howmany;counter++)
 		{
-			if(try_memory>=regions[counter].from && try_memory<regions[counter].to)
+			if(try_memory>=*(uint32_t*)regions[counter].from && try_memory<*(uint32_t*)regions[counter].to)
 			{
 				old_mode = regions[counter].mode;
 				break;
@@ -131,7 +132,7 @@ struct memregion *thediff, unsigned int diffsize)
 
 		for(counter=0;counter<new_number_of_regions;counter++)
 		{
-			if(try_memory>=regions[counter].from && try_memory<regions[counter].to)
+			if(try_memory>=*(uint32_t*)regions[counter].from && try_memory<*(uint32_t*)regions[counter].to)
 			{
 				new_mode = regions[counter].mode;
 				break;
@@ -152,19 +153,20 @@ struct memregion *thediff, unsigned int diffsize)
 	diff_counter=0;
 	uint32_t start_mem=0;
 	unsigned char prev_diff_mode = diffs[0].mode;
+	int counter = 0;
 	for(counter=0;counter<sizeof(diffs)/sizeof(diffs[0]);counter++)
 	{
 		unsigned char current_diff_mode = diffs[counter].mode;
 		if(current_diff_mode != prev_diff_mode)
 		{
 			struct memregion diff;
-			diff.from =start_mem;
-			diff.to = thediff[counter].memory - PAGE_SIZE;
-			diff.mode = prev_mode;
+			*((uint32_t*)diff.from) =start_mem;
+			*((uint32_t*)diff.to) = diffs[counter].memory - PAGE_SIZE;
+			diff.mode = prev_diff_mode;
 			thediff[diff_counter] = diff;
 			diff_counter++;
 		}
-		prev_mode=current_mode;
+		prev_diff_mode=current_diff_mode;
 	}
 	return sizeof(thediff)/sizeof(thediff[0]);
 }
