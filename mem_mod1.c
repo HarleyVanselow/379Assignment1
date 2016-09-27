@@ -24,7 +24,8 @@ int main(int argc, char const *argv[])
 		} else {
 			mode_text = "NO";
 		}
-		printf("0x%08X-0x%08X %s\n", *(uint32_t *)ptr[i].from, *(uint32_t*)ptr[i].to, mode_text);
+		// printf("0x%08X-0x%08X %s\n", *(uint32_t *)ptr[i].from, *(uint32_t*)ptr[i].to, mode_text);
+		printf("0x%u-0x%u %s\n", *(uint32_t *)ptr[i].from, *(uint32_t*)ptr[i].to, mode_text);
 	}
 	
 	return 0;

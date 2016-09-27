@@ -4,15 +4,21 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <sys/mman.h>
 
 int main(int argc, char const *argv[])
 {
 	struct memregion * ptr;
 	ptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
 
+	struct memregion * diffptr;
+	diffptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
+
 	int number_of_regions = get_mem_layout(ptr, 30);
+	int number_of_regions_diff = get_mem_diff(ptr, number_of_regions, diffptr, 30);
 	int i = 0;
 	printf("Numer of regions: %d\n", number_of_regions);
+	printf("Numer of diffs: %d\n", number_of_regions_diff);
 	for (i; i < number_of_regions; ++i)
 	{
 		int mode = ptr[i].mode;

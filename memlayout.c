@@ -94,7 +94,7 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 			*((uint32_t *)region.from) = start_address;
 			*((uint32_t *)region.to) = (current_memory_pointer-PAGE_SIZE);
 			region.mode = prev_mode;
-	return ++region_counter;
+	return region_counter;
 };
 
 int get_mem_diff (struct memregion *regions, unsigned int howmany,
@@ -115,7 +115,7 @@ struct memregion *thediff, unsigned int diffsize)
 	struct memregion old = regions[0];
 	uint32_t try_memory=0;
 	int diff_counter;
-	while(try_memory>=0)
+	while(try_memory>0)
 	{
 		int counter;
 		int diff_counter;
