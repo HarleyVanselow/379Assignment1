@@ -30,7 +30,8 @@ void handle_seg_fault(int sig)
 int get_mem_layout (struct memregion *regions, unsigned int size)
 {
 	printf("%d",3);
-
+	regions = (struct memregion*)malloc(sizeof(memregion)*size);
+	int region_counter =0;
 	struct sigaction onSegFault;
 	onSegFault.sa_handler = handle_seg_fault;
 	sigemptyset(&onSegFault.sa_mask);
@@ -56,7 +57,6 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 			*data_pointer = data;
 			// must be read and write
 			current_mode = MEM_RW;
-			//save
 		printf("Wrote at %lu\n", (long unsigned int) current_memory_pointer);
 
 		} else if(mode_try ==1)
@@ -70,11 +70,22 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 			current_mode = MEM_NO;
 			// printf("couldn't read or write\n");
 		}
-
+		if(current_mode!=prev_mode)
+		{
+			struct memregion region;
+			region.from = (void *)start_address;
+			region.to = (void *)(current_memory_pointer-PAGE_SIZE);
+			region.mode = prev_mode;
+			
+			regions[region_counter] = region;
+			region_counter++;
+			prev_mode=current_mode;
+			start_address=current_memory_pointer;
+		}
 		current_memory_pointer+=PAGE_SIZE;
 		mode_try =2;
 	}while(current_memory_pointer>0);
-	
+	return region_counter;
 };
 int get_mem_diff (struct memregion *regions, unsigned int howmany,
 struct memregion *thediff, unsigned int diffsize);
