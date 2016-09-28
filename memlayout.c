@@ -105,13 +105,17 @@ struct memregion *thediff, unsigned int diffsize)
 	int region_counter;
 
 	int old_counter;int new_counter;
+	// printf("diffs: %d, regions: %d\n", howmany, new_number_of_regions);
 	int diff_counter=0;
-	for(old_counter=0,new_counter=0;old_counter<howmany,new_counter<new_number_of_regions;old_counter++,new_counter++)
+	// printf("1");
+	for(old_counter=0,new_counter=0;old_counter<howmany&&new_counter<new_number_of_regions;old_counter++,new_counter++)
 	{
+		// printf("old: %d; new %d;\n",old_counter, new_counter );
 		struct memregion new = new_memregion[new_counter];
 		struct memregion old = regions[old_counter];
 		if(*((uint32_t*) new.from) != *((uint32_t*)old.from) || *((uint32_t*)new.to) !=*((uint32_t*) old.to) || new.mode != old.mode)
 		{
+			// printf("saving\n");
 			struct memregion diff;
 			diff.from = new.from;
 			diff.to =new.to;
@@ -120,6 +124,7 @@ struct memregion *thediff, unsigned int diffsize)
 			diff_counter++;
 		}	
 	}
+	// printf("ended\n");
 	return diff_counter;
 }
 
