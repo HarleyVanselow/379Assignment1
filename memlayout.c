@@ -110,7 +110,7 @@ struct memregion *thediff, unsigned int diffsize)
 	{
 		struct memregion new = new_memregion[new_counter];
 		struct memregion old = regions[old_counter];
-		if(new.from != old.from || new.to != old.to || new.mode != old.mode)
+		if(*((uint32_t*) new.from) != *((uint32_t*)old.from) || *((uint32_t*)new.to) !=*((uint32_t*) old.to) || new.mode != old.mode)
 		{
 			struct memregion diff;
 			diff.from = new.from;
