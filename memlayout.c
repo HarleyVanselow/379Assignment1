@@ -115,7 +115,7 @@ struct memregion *thediff, unsigned int diffsize)
 	struct memregion old = regions[0];
 	uint32_t try_memory=0;
 	int diff_counter;
-	while(try_memory>0)
+	do
 	{
 		int counter;
 		int diff_counter;
@@ -148,7 +148,7 @@ struct memregion *thediff, unsigned int diffsize)
 			diff_counter++;
 		}
 		try_memory+=PAGE_SIZE;
-	}
+	}while(try_memory>0);
 
 	diff_counter=0;
 	uint32_t start_mem=0;
