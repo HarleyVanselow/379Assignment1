@@ -104,70 +104,22 @@ struct memregion *thediff, unsigned int diffsize)
 	int new_number_of_regions = get_mem_layout(new_memregion,howmany);
 	int region_counter;
 
-	struct diff{
-		unsigned char mode;
-		uint32_t memory;
-	};
-
-	struct diff *diffs = (struct diff*)malloc(sizeof(struct diff)*((pow(2, 32))/PAGE_SIZE));
-
-	struct memregion new = new_memregion[0];
-	struct memregion old = regions[0];
-	uint32_t try_memory=0;
-	int diff_counter;
-	while(try_memory>0)
+	int old_counter;int new_counter;
+	int diff_counter=0;
+	for(old_counter=0,new_counter=0;old_counter<howmany,new_counter<new_number_of_regions;old_counter++,new_counter++)
 	{
-		int counter;
-		int diff_counter;
-		unsigned char old_mode;
-		unsigned char new_mode;
-		for(counter=0;counter<howmany;counter++)
-		{
-			if(try_memory>=*(uint32_t*)regions[counter].from && try_memory<*(uint32_t*)regions[counter].to)
-			{
-				old_mode = regions[counter].mode;
-				break;
-			}
-		}
-
-		for(counter=0;counter<new_number_of_regions;counter++)
-		{
-			if(try_memory>=*(uint32_t*)regions[counter].from && try_memory<*(uint32_t*)regions[counter].to)
-			{
-				new_mode = regions[counter].mode;
-				break;
-			}
-		}
-
-		if(new_mode!=old_mode)
-		{
-			struct diff new_diff;
-			new_diff.mode = new_mode;
-			new_diff.memory = try_memory;
-			diffs[diff_counter] = new_diff;
-			diff_counter++;
-		}
-		try_memory+=PAGE_SIZE;
-	}
-
-	diff_counter=0;
-	uint32_t start_mem=0;
-	unsigned char prev_diff_mode = diffs[0].mode;
-	int counter = 0;
-	for(counter=0;counter<sizeof(diffs)/sizeof(diffs[0]);counter++)
-	{
-		unsigned char current_diff_mode = diffs[counter].mode;
-		if(current_diff_mode != prev_diff_mode)
+		struct memregion new = new_memregion[new_counter];
+		struct memregion old = regions[old_counter];
+		if(new.from != old.from || new.to != old.to || new.mode != old.mode)
 		{
 			struct memregion diff;
-			*((uint32_t*)diff.from) =start_mem;
-			*((uint32_t*)diff.to) = diffs[counter].memory - PAGE_SIZE;
-			diff.mode = prev_diff_mode;
+			diff.from = new.from;
+			diff.to =new.to;
+			diff.mode= new.mode;
 			thediff[diff_counter] = diff;
 			diff_counter++;
-		}
-		prev_diff_mode=current_diff_mode;
+		}	
 	}
-	return sizeof(thediff)/sizeof(thediff[0]);
+	return diff_counter;
 }
 
