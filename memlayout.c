@@ -5,21 +5,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
-
-#define MEM_RW 0
-#define MEM_RO 1
-#define MEM_NO 2
-#define PAGE_SIZE 4096
+#include "memlayout.h"
 
 uint32_t current_memory_pointer = 0x0;
 sigjmp_buf env;
 int mode_try = 2;
-
-struct memregion {
-	void *from;
-	void *to;
-	unsigned char mode; /* MEM_RW, or MEM_RO, or MEM_NO */
-};
 
 void handle_seg_fault(int sig)
 {
@@ -27,7 +17,19 @@ void handle_seg_fault(int sig)
 	mode_try--;
 	siglongjmp(env,1);
 }
+uint32_t min(uint32_t a, uint32_t b){
+	if (a < b){
+		return a;
+	}
+	return b;
+}
 
+uint32_t max(uint32_t a, uint32_t b){
+	if (a > b){
+		return a;
+	}
+	return b;
+}
 int get_mem_layout (struct memregion *regions, unsigned int size)
 {
 	int region_counter =0;
@@ -102,27 +104,39 @@ struct memregion *thediff, unsigned int diffsize)
 {
 	struct memregion *new_memregion = (struct memregion*)malloc(sizeof(struct memregion)*howmany);
 	int new_number_of_regions = get_mem_layout(new_memregion,howmany);
-	int region_counter;
+	int region_counter =0;
 
-	int old_counter;int new_counter;
+	int old_counter = 0;
+	int new_counter = 0;
 	// printf("diffs: %d, regions: %d\n", howmany, new_number_of_regions);
 	int diff_counter=0;
 	// printf("1");
-	for(old_counter=0,new_counter=0;old_counter<howmany&&new_counter<new_number_of_regions;old_counter++,new_counter++)
-	{
-		// printf("old: %d; new %d;\n",old_counter, new_counter );
-		struct memregion new = new_memregion[new_counter];
-		struct memregion old = regions[old_counter];
-		if(*((uint32_t*) new.from) != *((uint32_t*)old.from) || *((uint32_t*)new.to) !=*((uint32_t*) old.to) || new.mode != old.mode)
-		{
-			// printf("saving\n");
-			struct memregion diff;
-			diff.from = new.from;
-			diff.to =new.to;
-			diff.mode= new.mode;
-			thediff[diff_counter] = diff;
-			diff_counter++;
-		}	
+	for (new_counter; new_counter < new_number_of_regions; new_counter++){
+		struct memregion current_new_region = regions[new_counter];
+
+		for (old_counter; old_counter < howmany; ){
+			struct memregion current_old_region = regions[old_counter];
+
+			if (*(uint32_t*)current_new_region.to <= *(uint32_t*)current_old_region.to){
+				if (current_new_region.mode != current_old_region.mode){
+					struct memregion diff_region;
+					diff_region.from = malloc(sizeof(uint32_t));
+					diff_region.to = malloc(sizeof(uint32_t));
+					*((uint32_t *)diff_region.from) = max((uint32_t)&current_new_region.from, (uint32_t)&current_old_region.from);
+					*((uint32_t *)diff_region.to) =  min((uint32_t)&current_new_region.to, (uint32_t)&current_old_region.to);
+					diff_region.mode = current_new_region.mode;
+					if (diff_counter < diffsize){
+						thediff[diff_counter] = diff_region;
+						diff_counter ++;
+					}
+				}
+				break;
+			} else {
+				continue;
+				old_counter++;
+			}
+		}
+
 	}
 	// printf("ended\n");
 	return diff_counter;
