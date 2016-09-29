@@ -7,7 +7,7 @@
 #include <math.h>
 #include "memlayout.h"
 
-uint32_t current_memory_pointer = 0x0;
+uint32_t current_memory_pointer;
 sigjmp_buf env;
 int mode_try = 2;
 
@@ -31,7 +31,8 @@ uint32_t max(uint32_t a, uint32_t b){
 	return b;
 }
 int get_mem_layout (struct memregion *regions, unsigned int size)
-{
+{ 	
+	current_memory_pointer= 0x0;
 	int region_counter =0;
 	struct sigaction onSegFault;
 	onSegFault.sa_handler = handle_seg_fault;
@@ -104,41 +105,59 @@ struct memregion *thediff, unsigned int diffsize)
 {
 	struct memregion *new_memregion = (struct memregion*)malloc(sizeof(struct memregion)*howmany);
 	int new_number_of_regions = get_mem_layout(new_memregion,howmany);
+
+	printf("Number of regions in new: %d\n", new_number_of_regions);
+	int i;
+	for (i =0; i < new_number_of_regions; i++)
+	{
+		int mode = new_memregion[i].mode;
+		char * mode_text;
+		if (mode == 0){
+			mode_text = "RW";
+		} else if (mode == 1){
+			mode_text = "RO";
+		} else {
+			mode_text = "NO";
+		}
+		printf("0x%08X-0x%08X %s\n", *(uint32_t *)new_memregion[i].from, *(uint32_t*)new_memregion[i].to, mode_text);
+	}
+
+
 	int region_counter =0;
 
 	int old_counter = 0;
 	int new_counter = 0;
 	// printf("diffs: %d, regions: %d\n", howmany, new_number_of_regions);
 	int diff_counter=0;
-	// printf("1");
-	for (new_counter; new_counter < new_number_of_regions; new_counter++){
+	for (; new_counter < new_number_of_regions; new_counter++){
 		struct memregion current_new_region = regions[new_counter];
-
-		for (old_counter; old_counter < howmany; ){
+		while(old_counter<howmany){
 			struct memregion current_old_region = regions[old_counter];
-
-			if (*(uint32_t*)current_new_region.to <= *(uint32_t*)current_old_region.to){
-				if (current_new_region.mode != current_old_region.mode){
+			//If new region ends before or at old region
+			if (*(uint32_t*)current_new_region.to <= *(uint32_t*)current_old_region.to)
+			{
+				if(current_new_region.mode != current_old_region.mode)
+				{
 					struct memregion diff_region;
 					diff_region.from = malloc(sizeof(uint32_t));
 					diff_region.to = malloc(sizeof(uint32_t));
-					*((uint32_t *)diff_region.from) = max((uint32_t)&current_new_region.from, (uint32_t)&current_old_region.from);
-					*((uint32_t *)diff_region.to) =  min((uint32_t)&current_new_region.to, (uint32_t)&current_old_region.to);
+					*((uint32_t *)diff_region.from) = max(*(uint32_t*)current_new_region.from, *(uint32_t*)current_old_region.from);
+					*((uint32_t *)diff_region.to) =  min(*(uint32_t*)current_new_region.to, *(uint32_t*)current_old_region.to);
 					diff_region.mode = current_new_region.mode;
 					if (diff_counter < diffsize){
 						thediff[diff_counter] = diff_region;
-						diff_counter ++;
 					}
-				}
+				printf("New mode: %d old mode: %d\n",current_new_region.mode,current_old_region.mode);
+					diff_counter ++;
+				} 
 				break;
-			} else {
-				continue;
+			}	
+			else{
 				old_counter++;
 			}
-		}
-
 	}
-	// printf("ended\n");
+	printf("ended with %d diffs\n",diff_counter);
 	return diff_counter;
+}
 }
 
