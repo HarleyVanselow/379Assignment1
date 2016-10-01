@@ -10,7 +10,7 @@ mem_mod2.out: memlayout.o
 	gcc mem_mod2.c memlayout.o -o mem_mod2.out -m32
 
 mem_mod3.out: memlayout.o
-	gcc mem_mod2.c memlayout.o -o mem_mod3.out -m32
+	gcc mem_mod3.c memlayout.o -o mem_mod3.out -m32
 
 run1: mem_mod1.out
 	./mem_mod1.out

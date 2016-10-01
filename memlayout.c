@@ -17,19 +17,19 @@ void handle_seg_fault(int sig)
 	mode_try--;
 	siglongjmp(env,1);
 }
-uint32_t min(uint32_t a, uint32_t b){
-	if (a < b){
-		return a;
-	}
-	return b;
-}
+// uint32_t min(uint32_t a, uint32_t b){
+// 	if (a < b){
+// 		return a;
+// 	}
+// 	return b;
+// }
 
-uint32_t max(uint32_t a, uint32_t b){
-	if (a > b){
-		return a;
-	}
-	return b;
-}
+// uint32_t max(uint32_t a, uint32_t b){
+// 	if (a > b){
+// 		return a;
+// 	}
+// 	return b;
+// }
 
 int get_mem_layout (struct memregion *regions, unsigned int size)
 { 	
@@ -49,7 +49,7 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 	do{
 		sigsetjmp(env, 1);
 
-		if (current_memory_pointer < 0) {break;}
+		// if (current_memory_pointer < 0) {break;}
 
 		// printf("Current memory %ld\n", current_memory_pointer);
 		uint32_t * data_pointer = ((uint32_t*) current_memory_pointer);
@@ -79,7 +79,7 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 			region.from = malloc(sizeof(uint32_t));
 			region.to = malloc(sizeof(uint32_t));
 			*((uint32_t *)region.from) = start_address;
-			*((uint32_t *)region.to) = (current_memory_pointer-PAGE_SIZE);
+			*((uint32_t *)region.to) = (current_memory_pointer);
 			region.mode = prev_mode;
 			// printf("start: %u, end: %u mode: %u\n", start_address, current_memory_pointer - PAGE_SIZE, prev_mode );
 			// printf("start: %u, end: %u mode: %u\n", *(uint32_t *)region.from, *(uint32_t*)region.to, region.mode);
@@ -89,15 +89,20 @@ int get_mem_layout (struct memregion *regions, unsigned int size)
 			prev_mode=current_mode;
 			start_address=current_memory_pointer;
 		}
+		// printf("Mem pointer:%u\n",current_memory_pointer);
 		current_memory_pointer+=PAGE_SIZE;
 		mode_try =2;
-	}while(current_memory_pointer>0);
+	}while(current_memory_pointer<4294967295-PAGE_SIZE);
+	printf("Current pointer:%u\n",current_memory_pointer);
+	
 	struct memregion region;
 	region.from = malloc(sizeof(uint32_t));
 	region.to = malloc(sizeof(uint32_t));
 	*((uint32_t *)region.from) = start_address;
-	*((uint32_t *)region.to) = (current_memory_pointer-PAGE_SIZE);
+	*((uint32_t *)region.to) = (current_memory_pointer);
 	region.mode = prev_mode;
+	regions[region_counter] = region;
+	region_counter++;
 	return region_counter;
 };
 
@@ -147,8 +152,22 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany,
 				struct memregion diff_region;
 				diff_region.from = malloc(sizeof(uint32_t));
 				diff_region.to = malloc(sizeof(uint32_t));
-				*((uint32_t *)diff_region.from) = max(*(uint32_t*)current_new_region.from, *(uint32_t*)current_old_region.from);
-				*((uint32_t *)diff_region.to) =  min(*(uint32_t*)current_new_region.to, *(uint32_t*)current_old_region.to);
+				uint32_t new_from = *(uint32_t*)current_new_region.from;
+				uint32_t new_to = *(uint32_t*)current_new_region.to;
+				uint32_t old_from =*(uint32_t*)current_old_region.from;
+				uint32_t old_to = *(uint32_t*)current_old_region.to;
+
+// *((uint32_t *)diff_region.from) = max(*(uint32_t*)current_new_region.from, *(uint32_t*)current_old_region.from);
+				if(new_from>=old_from){
+					*((uint32_t *)diff_region.from) = new_from;
+				}else{*((uint32_t *)diff_region.from) = old_from;}
+
+// *((uint32_t *)diff_region.to) =  min(*(uint32_t*)current_new_region.to, *(uint32_t*)current_old_region.to);
+				if(new_to<=old_to){
+				*((uint32_t *)diff_region.to) = new_to;	
+				}else{*((uint32_t *)diff_region.to) = old_to;}
+
+				
 				diff_region.mode = current_new_region.mode;
 				if (diff_counter < diffsize){
 					thediff[diff_counter] = diff_region;
