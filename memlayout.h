@@ -14,7 +14,7 @@
 #endif
 
 #ifndef PAGE_SIZE
-#define PAGE_SIZE 4096
+#define PAGE_SIZE 4096 / sizeof(void*) // 4K bytes/4bytes/*
 #endif
 
 struct memregion {

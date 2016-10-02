@@ -15,6 +15,8 @@ int main(int argc, char const *argv[])
 	struct memregion * diffptr;
 	diffptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
 
+	printf("Size of void*: %d\n", sizeof(ptr));
+
 	
 	int i = 0;
 	int number_of_regions = get_mem_layout(ptr, 30);
@@ -30,10 +32,12 @@ int main(int argc, char const *argv[])
 		} else {
 			mode_text = "NO";
 		}
-		printf("0x%08X-0x%08X %s\n", *(uint32_t *)ptr[i].from, *(uint32_t*)ptr[i].to, mode_text);
+		printf("0x%08X-0x%08X %s\n", (uint32_t)ptr[i].from, (uint32_t)ptr[i].to, mode_text);
 	}
-	
-	// int * x = mmap((void *)(*(uint32_t*)ptr[0].to), PAGE_SIZE, PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+		
+	void * addr = ptr[1].from;
+	printf("0x%08X - Length %X \n", (uint32_t)addr, PAGE_SIZE * sizeof(void*) * 4096);
+	int * x = mmap(addr, PAGE_SIZE * sizeof(void*) * 4096, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
 	number_of_regions_diff = get_mem_diff(ptr, number_of_regions, diffptr, 30);
 
 	printf("Number of diffs: %d\n", number_of_regions_diff);
@@ -48,7 +52,7 @@ int main(int argc, char const *argv[])
 		} else {
 			mode_text = "NO";
 		}
-		printf("0x%08X-0x%08X %s\n", *(uint32_t *)diffptr[i].from, *(uint32_t*)diffptr[i].to, mode_text);
+		printf("0x%08X-0x%08X %s\n", (uint32_t)diffptr[i].from, (uint32_t)diffptr[i].to, mode_text);
 	}
 	return 0;
 }
