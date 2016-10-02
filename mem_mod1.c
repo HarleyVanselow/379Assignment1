@@ -15,16 +15,14 @@ int main(int argc, char const *argv[])
 	struct memregion * diffptr;
 	diffptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
 
-	printf("Size of void*: %d\n", sizeof(ptr));
-
-	
+		
 	int i = 0;
 	int number_of_regions = get_mem_layout(ptr, 30);
 	printf("Number of regions: %d\n", number_of_regions);
 	for (i =0; i < number_of_regions; i++)
 	{
 		int mode = ptr[i].mode;
-		char * mode_text;
+		char const* mode_text;
 		if (mode == 0){
 			mode_text = "RW";
 		} else if (mode == 1){
@@ -34,17 +32,15 @@ int main(int argc, char const *argv[])
 		}
 		printf("0x%08X-0x%08X %s\n", (uint32_t)ptr[i].from, (uint32_t)ptr[i].to, mode_text);
 	}
-		
-	void * addr = ptr[1].from;
-	printf("0x%08X - Length %X \n", (uint32_t)addr, PAGE_SIZE * sizeof(void*) * 4096);
-	int * x = mmap(addr, PAGE_SIZE * sizeof(void*) * 4096, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+ 	//Grow the heap
+	void* test_mem = malloc(PAGE_SIZE*sizeof(void*)*4096);
 	number_of_regions_diff = get_mem_diff(ptr, number_of_regions, diffptr, 30);
-
+	free(test_mem);
 	printf("Number of diffs: %d\n", number_of_regions_diff);
 	for (i =0; i < number_of_regions_diff; i++)
 	{
 		int mode = diffptr[i].mode;
-		char * mode_text;
+		char const* mode_text;
 		if (mode == 0){
 			mode_text = "RW";
 		} else if (mode == 1){

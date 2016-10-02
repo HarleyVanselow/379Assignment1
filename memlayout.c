@@ -123,22 +123,22 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany,
 	//printf("Number of regions in new: %d vs HowMany %d\n", new_number_of_regions, howmany);
 	//int new_howmany = ( new_number_of_regions <= howmany ) ? new_number_of_regions : howmany;
 	int new_howmany = ( new_number_of_regions <= 30 ) ? new_number_of_regions : 30;
-	printf("Number of regions in new: %d\n", new_number_of_regions);
+	// printf("Number of regions in new: %d\n", new_number_of_regions);
 
-	int i;
-	for (i =0; i < new_howmany; i++)
-	{
-		int mode = new_memregion[i].mode;
-		char const * mode_text;
-		if (mode == 0){
-			mode_text = "RW";
-		} else if (mode == 1){
-			mode_text = "RO";
-		} else {
-			mode_text = "NO";
-		}
-		printf("0x%08X-0x%08X %s\n", (uint32_t)new_memregion[i].from, (uint32_t)new_memregion[i].to, mode_text);
-	}
+	// int i;
+	// for (i =0; i < new_howmany; i++)
+	// {
+	// 	int mode = new_memregion[i].mode;
+	// 	char const * mode_text;
+	// 	if (mode == 0){
+	// 		mode_text = "RW";
+	// 	} else if (mode == 1){
+	// 		mode_text = "RO";
+	// 	} else {
+	// 		mode_text = "NO";
+	// 	}
+	// 	printf("0x%08X-0x%08X %s\n", (uint32_t)new_memregion[i].from, (uint32_t)new_memregion[i].to, mode_text);
+	// }
 
 
 	int region_counter =0;
