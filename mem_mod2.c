@@ -9,7 +9,7 @@ void get_diff(struct memregion* ptr, int number_of_regions,struct memregion* dif
 {
 	//Grow the stack.
 	unsigned char test[100000];
-	int number_of_regions_diff = get_mem_diff(ptr, number_of_regions, diffptr, 30);
+	int number_of_regions_diff = get_mem_diff(ptr, number_of_regions, diffptr, NUMBER_REGIONS_GUESS);
 	int i;
 	printf("Number of diffs: %d\n", number_of_regions_diff);
 	for (i =0; i < number_of_regions_diff; i++)
@@ -29,15 +29,15 @@ void get_diff(struct memregion* ptr, int number_of_regions,struct memregion* dif
 int main(int argc, char const *argv[])
 {
 	struct memregion * ptr;
-	ptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
+	ptr = (struct memregion*)malloc(sizeof(struct memregion)*NUMBER_REGIONS_GUESS);
 	uint32_t address = 0;
 	
 	struct memregion * diffptr;
-	diffptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
+	diffptr = (struct memregion*)malloc(sizeof(struct memregion)*NUMBER_REGIONS_GUESS);
 
 		
 	int i = 0;
-	int number_of_regions = get_mem_layout(ptr, 30);
+	int number_of_regions = get_mem_layout(ptr, NUMBER_REGIONS_GUESS);
 	printf("Number of regions: %d\n", number_of_regions);
 	for (i =0; i < number_of_regions; i++)
 	{

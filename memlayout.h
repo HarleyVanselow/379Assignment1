@@ -14,7 +14,11 @@
 #endif
 
 #ifndef PAGE_SIZE
-#define PAGE_SIZE 4096 / sizeof(void*) // 4K bytes/4bytes/*
+#define PAGE_SIZE 2048 / sizeof(void*) // 4K bytes/4bytes/*
+#endif
+
+#ifndef NUMBER_REGIONS_GUESS
+#define NUMBER_REGIONS_GUESS 50
 #endif
 
 struct memregion {

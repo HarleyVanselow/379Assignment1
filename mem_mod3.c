@@ -9,11 +9,11 @@
 int main(int argc, char const *argv[])
 {
 	struct memregion * ptr;
-	ptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
+	ptr = (struct memregion*)malloc(sizeof(struct memregion)*NUMBER_REGIONS_GUESS);
 	uint32_t address = 0;
 	int number_of_regions_diff;
 	struct memregion * diffptr;
-	diffptr = (struct memregion*)malloc(sizeof(struct memregion)*30);
+	diffptr = (struct memregion*)malloc(sizeof(struct memregion)*NUMBER_REGIONS_GUESS);
 
 	void* selected_to;
 	void* selected_from;
@@ -22,7 +22,7 @@ int main(int argc, char const *argv[])
 	// Some action here
 	int created_region_size = PAGE_SIZE*sizeof(void*) * 100;
 	void* address_changed = mmap(NULL,created_region_size,PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
-	int number_of_regions = get_mem_layout(ptr, 30);
+	int number_of_regions = get_mem_layout(ptr, NUMBER_REGIONS_GUESS);
 	printf("Number of regions: %d\n", number_of_regions);
 	for (i =0; i < number_of_regions; i++)
 	{
@@ -46,9 +46,8 @@ int main(int argc, char const *argv[])
 			break;
 		}
 	}
-	printf("Start address: 0x%08X\n",(uint32_t)address_changed);
 	mmap(address_changed,created_region_size, PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
-	number_of_regions_diff = get_mem_diff(ptr, number_of_regions, diffptr, 30);
+	number_of_regions_diff = get_mem_diff(ptr, number_of_regions, diffptr, NUMBER_REGIONS_GUESS);
 	
 	printf("Number of diffs: %d\n", number_of_regions_diff);
 	for (i =0; i < number_of_regions_diff; i++)
